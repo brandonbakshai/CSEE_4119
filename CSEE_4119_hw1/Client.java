@@ -75,7 +75,6 @@ public class Client extends JFrame implements Runnable
 			out.flush();
 			
 			serverText = serverIn.readLine();
-			chat.setText(chat.getText() + " " + serverText);
 			if (serverText.equals("success"))
 			{
 				name = text;

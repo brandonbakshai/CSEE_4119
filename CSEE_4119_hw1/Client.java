@@ -23,6 +23,7 @@ public class Client extends JFrame implements Runnable
     static JTextArea chat;
     static String serverText;
     static String name;
+    static int TIME_OUT = 2;
         
     public Client(String hostName, int portNumber) throws UnknownHostException, IOException, InterruptedException
     {
@@ -134,6 +135,7 @@ public class Client extends JFrame implements Runnable
 		{
 			try 
 			{
+				//socket.setSoTimeout(1000);
 				while (!(serverText = serverIn.readLine()).equals("done")) 
 				{
 					chat.setText(chat.getText() + "\n" + serverText);
@@ -161,6 +163,10 @@ public class Client extends JFrame implements Runnable
 		
 		Client client = new Client(hostName, portNumber);
 		} catch (InterruptedException e)
+		{
+			logout();
+			System.exit(0);
+		} catch (InterruptedIOException e)
 		{
 			logout();
 			System.exit(0);

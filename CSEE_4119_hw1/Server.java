@@ -7,6 +7,7 @@ public class Server {
     // data fields
     static HashMap<String, User> users;
     int port;
+    static int TIME_OUT = 1;
 
     // constructors
     public Server(int port) throws FileNotFoundException {
@@ -271,8 +272,7 @@ public class Server {
         {
         	Scanner scan = new Scanner(com);
         	String order = scan.next().toLowerCase();
-                String tmp;
-        	
+            String tmp;
         	
             if (order.equals("whoelse"))
             {
@@ -389,7 +389,7 @@ public class Server {
     			while (!go) 
     			{
     				
-    				Date timeToRun = new Date(System.currentTimeMillis() + TIME_OUT*60*1000);
+    				Date timeToRun = new Date(System.currentTimeMillis() + 30*60*1000);
   	        	   Timer timer = new Timer();
   	        	   timer.schedule(new TimerTask() {
   	        	           public void run() {
@@ -400,8 +400,18 @@ public class Server {
   	        	           }
   	        	       }, timeToRun);
   	        	   
-    				String com = in.readLine();
-    				
+  	        	    String com = "command";
+  	        	    
+  	        	   	socket.setSoTimeout(1000);
+  	        	   	try{
+  	        	   		com = in.readLine();
+  	        	   	} catch (SocketTimeoutException e)
+  	        	   	{
+  	        	   		Server.users.get(name).logged_in = false;
+  	        	   		out.println("logout");
+  	        	   		out.flush();
+  	        	   		break;
+  	        	   	}
 
     				command(com);
     				if (com.equals("logout") || !Server.users.get(name).logged_in) 
@@ -416,7 +426,10 @@ public class Server {
     					
     		} catch (IOException e1) 
     		{
-    			e1.printStackTrace();
+    			Server.users.get(name).logged_in = false;
+    			out.println("logout");
+				out.flush();
+				break;
     		}
     		
     	}
@@ -426,7 +439,7 @@ public class Server {
     // main method
     public static void main(String[] args) throws IOException 
     {
-  
+    	
     	int port;
     	
     	if (args[0] == null)
@@ -436,20 +449,27 @@ public class Server {
     		
     	Server server = new Server(port);
     	
+    	
     	ServerSocket serverSocket = new ServerSocket(port);
     	
     	
     	
+    	
+    	
     		
-    	while (true) 
-    	{
+    		while (true) 
+    		{
+ 
+    			Socket clientSocket = serverSocket.accept();
+    			clientSocket.setSoTimeout(TIME_OUT*60*1000);
+    			User anonUser = new User(clientSocket.getInetAddress().toString(), clientSocket);
+    			Thread thread = new Thread(anonUser);
+    			thread.start();
+    			
+    	
     		
-    		Socket clientSocket = serverSocket.accept();
-    		User anonUser = new User(clientSocket.getInetAddress().toString(), clientSocket);
-    		Thread thread = new Thread(anonUser);
-    		thread.start();
-    		
-    	}
+    		}
+    	
     	
     }
     

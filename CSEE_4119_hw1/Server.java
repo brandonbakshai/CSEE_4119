@@ -162,7 +162,7 @@ public class Server {
         static long timer;
         static long timeout;
         static boolean blocked;
-        static int TIME_OUT = 1;
+        static int TIME_OUT = 30;
         static boolean go;
         HashMap<String, Integer> blocked_ips;
         static int ATTEMPTS = 3;

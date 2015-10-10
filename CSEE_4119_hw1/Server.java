@@ -266,38 +266,39 @@ public class Server {
         	}
         }
         
+
         public boolean command(String com) 
         {
         	Scanner scan = new Scanner(com);
-        	String order = scan.next();
-        	String tmp;
+        	String order = scan.next().toLowerCase();
+                String tmp;
         	
-        	switch (order.toLowerCase()) {
-            case "whoelse":
+        	
+            if (order.equals("whoelse"))
+            {
                 whoelse();
-                break;
-            case "wholast":
+            } else if (order.equals("wholast"))
+            {
                 wholast(com);
-                break;
-            case "broadcast":
+            } else if (order.equals("broadcast")) 
+            {
             	if ((tmp = scan.next()).equals("message"))
             		broadcastmessage(com);
             	else if (tmp.equals("user"))
             		broadcastuser(com);
-                break;
-            case "message":
+            } else if (order.equals("message"))
+            {
                 message(com);
-                break;
-            case "logout":
+            } else if (equals.("logout"))
+            {
                 logout();
-                break;
-            default: 
-            	confused();
-                break;
-        	}
-        	
-        scan.close();
-        return false;
+            } else 
+            {
+                confused();
+            }
+
+                scan.close();
+                return false;
         }
         
         public void whoelse() {

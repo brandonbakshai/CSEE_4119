@@ -10,8 +10,8 @@ public class Server {
     // data fields
     static HashMap<String, User> users;
     int port;
-    static int TIME_OUT = 5;
-    static int ATTEMPTS = 3;
+    static int TIME_OUT = 30; \\ minutes
+    static int ATTEMPTS = 3; 
 
     // constructors
     public Server(int port) throws FileNotFoundException {

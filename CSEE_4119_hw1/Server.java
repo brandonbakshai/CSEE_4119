@@ -177,7 +177,7 @@ public class Server {
             this.socket = socket;
             this.blocked = false;
             this.go = false;
-            blocked_ips = new HashMap<>();
+            blocked_ips = new HashMap<String, Integer>();
         }
         
         public User(String name, String pass, String ip) {

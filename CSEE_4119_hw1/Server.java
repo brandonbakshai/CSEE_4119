@@ -20,7 +20,7 @@ public class Server {
     			"./user_pass.txt"));
 	
 	
-    	HashMap<String, User> users = new HashMap<>();
+    	HashMap<String, User> users = new HashMap<String, User>();
     	String c;
 
     	while (scanner.hasNextLine()) {

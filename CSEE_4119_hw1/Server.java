@@ -122,8 +122,7 @@ public class Server {
     	{
     		tmpName = iterator.next();
     		tmpUser = users.get(tmpName);
-    		if (tmpUser != user &&
-    				tmpUser.logged_in &&
+    		if (tmpUser.logged_in &&
     					(tmpUser.socket != null)) {
     			tmpUser.out.println(message + "\ndone");
     		    tmpUser.out.flush();
@@ -131,7 +130,7 @@ public class Server {
     	}
     }
     
-    public static void sendOnlineUsers(String users, PrintWriter out, String message) 
+    public static void sendOnlineUsers(User me, String users, PrintWriter out, String message) 
     {
     	User tmpUser;
     	
@@ -146,6 +145,8 @@ public class Server {
     			tmpUser.out.println(message + "\ndone");
     		    tmpUser.out.flush();
     		}
+    		me.out.println(message + "\ndone");
+    		me.out.flush();
     	}    	
     }
     
@@ -327,7 +328,7 @@ public class Server {
         	String[] all = order.split(" message ");
         	String message = all[1];
         	String users = all[0].split(" user ")[1];
-        	Server.sendOnlineUsers(users, this.out, name + ": " + message);
+        	Server.sendOnlineUsers(Server.users.get(name), users, this.out, name + ": " + message);
         }
         
         public void message(String order) 
@@ -337,7 +338,7 @@ public class Server {
         	Scanner scanner = new Scanner(message);
         	String user = scanner.next();
         	message = message.split(user + " ")[1];
-        	Server.sendOnlineUsers(user, this.out, name + ": " + message);
+        	Server.sendOnlineUsers(Server.users.get(name), user, this.out, name + ": " + message);
         }
         
         public void logout() 

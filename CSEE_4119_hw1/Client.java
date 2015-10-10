@@ -23,7 +23,6 @@ public class Client extends JFrame implements Runnable
     static JTextArea chat;
     static String serverText;
     static String name;
-    static int TIME_OUT = 1;
         
     public Client(String hostName, int portNumber) throws UnknownHostException, IOException, InterruptedException
     {

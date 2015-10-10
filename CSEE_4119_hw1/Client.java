@@ -13,6 +13,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
+// client class which establishes a connection
+// to the server
 public class Client extends JFrame implements Runnable
 {
 
@@ -23,46 +25,51 @@ public class Client extends JFrame implements Runnable
     static JTextArea chat;
     static String serverText;
     static String name;
-    static int TIME_OUT = 2;
-        
+    
     public Client(String hostName, int portNumber) throws UnknownHostException, IOException, InterruptedException
     {
+        // establish connection to server
     	socket = new Socket(hostName, portNumber);
 		in = new BufferedReader(new InputStreamReader(System.in));
 		serverIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		out = new PrintWriter(socket.getOutputStream());
 		
+        // construct JFrame
 		Container cp = getContentPane();
-	      cp.setLayout(new GridLayout());
-	      JTextArea field;
-	 
-	      field = new JTextArea("");
-	      field.setEditable(false);
-	      cp.add(field);
-	      field.setMaximumSize(getMaximumSize());
-	      JScrollPane scroll = new JScrollPane (field, 
+        cp.setLayout(new GridLayout());
+        JTextArea field;
+        field = new JTextArea("");
+        field.setEditable(false);
+        cp.add(field);
+        field.setMaximumSize(getMaximumSize());
+        JScrollPane scroll = new JScrollPane (field,
 	    		   JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-	      cp.add(scroll);
-	      chat = field;
+        cp.add(scroll);
+        chat = field;
 	      
 	 
-	      setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  // Exit program if close-window button clicked
-	      setTitle("chat program"); // "this" JFrame sets title
-	      setSize(300, 300);         // "this" JFrame sets initial size
-	      setVisible(true);          // "this" JFrame shows
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setTitle("chat program");
+        setSize(300, 300);
+        setVisible(true);
 		
+        // begin infinite loop of username and passoword validation
+        // and command prompting.
+        // the loop only begins over again if command is interrupted,
+        // meaning the user logs out
 	    while (true)
 	    {
-	    field.setText("");
-		username();
-		password();
-		Thread thread = new Thread(this);
-		thread.start();
-		command();
-		thread.sleep(2000);
+            field.setText("");
+            username();
+            password();
+            Thread thread = new Thread(this);
+            thread.start();
+            command();
+            thread.sleep(2000);
     	}
     }
   
+    // handles validation of username
 	public static void username() throws IOException 
 	{
 		
@@ -83,7 +90,7 @@ public class Client extends JFrame implements Runnable
 		}
 	}
 	
-	// client-side of password authentication
+	// handles validation of password
 	public static void password() throws IOException 
 	{	
 		while (true) 
@@ -103,13 +110,12 @@ public class Client extends JFrame implements Runnable
 		}
 	}
 	
-	// client side of command delivery
+	// handles command delivery
 	public static void command() throws IOException 
 	{	
 		while (true) 
 		{	
 			System.out.print("command: ");
-			
 			
 			String text = in.readLine();
 			if (!(text == null))
@@ -118,17 +124,17 @@ public class Client extends JFrame implements Runnable
       	   
 			if (text.equals("logout"))
 				System.exit(0);
-				
 		}
-		
 	}
 	
+    // handles logout on the client side
 	public static void logout() 
 	{
 		out.println("logout");
 		out.flush();
 	}
 	
+    // thread to continuously listen for server response
 	@Override
 	public void run() 
 	{
@@ -136,24 +142,21 @@ public class Client extends JFrame implements Runnable
 		{
 			try 
 			{
-				//socket.setSoTimeout(1000);
-				while (!(serverText = serverIn.readLine()).equals("done")) 
+				while (!(serverText = serverIn.readLine()).equals("done"))
 				{
 					chat.setText(chat.getText() + "\n" + serverText);
 					if (serverText.equals("logout")) 
 					{
 						System.exit(0);
 					}
-						
-						
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
-		
 	}
-	
+    
+	// main method
 	public static void main(String[] args) throws UnknownHostException, IOException, InterruptedException
 	{
 		String hostName = args[0];
@@ -161,8 +164,8 @@ public class Client extends JFrame implements Runnable
 		
 		try
 		{
-		
-		Client client = new Client(hostName, portNumber);
+            // start client process
+            Client client = new Client(hostName, portNumber);
 		} catch (InterruptedException e)
 		{
 			logout();
@@ -174,7 +177,4 @@ public class Client extends JFrame implements Runnable
 		}
 		
 	}
-
-	
-	
 }

@@ -2,12 +2,16 @@ import java.util.*;
 import java.io.*;
 import java.net.*;
 
+// a multithreaded server which accepts
+// multiple clients and supports various
+// functionalities
 public class Server {
 
     // data fields
     static HashMap<String, User> users;
     int port;
     static int TIME_OUT = 5;
+    static int ATTEMPTS = 3;
 
     // constructors
     public Server(int port) throws FileNotFoundException {
@@ -47,6 +51,7 @@ public class Server {
 		return users; 
     }
     
+    // program to check if two dates are of the same day
     public static boolean isSameDay(Calendar date1, Calendar date2, int num) 
     {
     	
@@ -69,6 +74,7 @@ public class Server {
     	return (Math.abs(total1 - total2) <= num);
     }
     
+    // print out all online users
     public static void printOnline(User user, PrintWriter out) 
     {
     	Iterator<String> iterator =  users.keySet().iterator();
@@ -87,6 +93,7 @@ public class Server {
     	out.flush();
     }
     
+    // print out all users online in the last "last" minutes
     public static void printLast(User user, int last, PrintWriter out) 
     {
     	Iterator<String> iterator =  users.keySet().iterator();
@@ -112,6 +119,7 @@ public class Server {
     	out.flush();
     }
     
+    // "broadcast message" to all online users
     public static void sendOnline(User user, PrintWriter out, String message) 
     {
     	Iterator<String> iterator =  users.keySet().iterator();
@@ -130,6 +138,7 @@ public class Server {
     	}
     }
     
+    // "broadcast user message" to listed users
     public static void sendOnlineUsers(User me, String users, PrintWriter out, String message) 
     {
     	User tmpUser;
@@ -150,6 +159,7 @@ public class Server {
     	}    	
     }
     
+    // nested class containing user information
     public static class User implements Runnable {
 
         // data fields
@@ -164,10 +174,9 @@ public class Server {
         static long timer;
         static long timeout;
         static boolean blocked;
-        static int TIME_OUT = 1;
         static boolean go;
         HashMap<String, Integer> blocked_ips;
-        static int ATTEMPTS = 3;
+        
 
         // constructors
         public User(String name, String pass, String ip, Socket socket) {
@@ -199,11 +208,15 @@ public class Server {
         	this("anon", null);
         }
         
+        //methods
+        
+        //set go equal to bin
         public static void setgo(boolean bin)
         {
         	go = bin;
         }
-            
+        
+        // validate username
         public boolean username(String username) 
         {
         	User user = users.get(username);
@@ -223,11 +236,12 @@ public class Server {
         	}
         }
         
+        // validate password
         public boolean password(String username, String password) 
         {
         	Server.User user = Server.users.get(username);
         	long elapsedTime = (new Date()).getTime() - user.timer;
-        	if (user.blocked_ips.get(user.ip) > ATTEMPTS -1)
+        	if (user.blocked_ips.get(user.ip) > Server.ATTEMPTS - 1)
         	{
         		user.blocked = true;
         	}
@@ -268,7 +282,7 @@ public class Server {
         	}
         }
         
-
+        // interpret commands sent by client
         public boolean command(String com) 
         {
         	if (com == null)
@@ -304,10 +318,13 @@ public class Server {
                 return false;
         }
         
+        // wrapper method to print out who else is online
         public void whoelse() {
         	Server.printOnline(users.get(name), out);
         }
         
+        // wrapper method to print out who was online in the last
+        // specified amount of time
         public void wholast(String order) 
         {
         	Scanner scan = new Scanner(order);
@@ -317,12 +334,14 @@ public class Server {
         	scan.close();
         }
         
+        // wrapper method to broadcast a message to all online users
         public void broadcastmessage(String order) 
         {
         	String message = order.split(" message ")[1];
         	Server.sendOnline(users.get(name), this.out, name + ": " + message);
         }
         
+        // wrapper method to broadcast a message to a list of users
         public void broadcastuser(String order) 
         {
         	String[] all = order.split(" message ");
@@ -331,6 +350,7 @@ public class Server {
         	Server.sendOnlineUsers(Server.users.get(name), users, this.out, name + ": " + message);
         }
         
+        // wrapper method to send private message to a user
         public void message(String order) 
         {
         	String[] all = order.split("message ");
@@ -341,11 +361,13 @@ public class Server {
         	Server.sendOnlineUsers(Server.users.get(name), user, this.out, name + ": " + message);
         }
         
+        // logout the client
         public void logout() 
         {
         	Server.users.get(name).logged_in = false;
         }
         
+        // runs when comman cannot be interpreted
         public void confused()
         {
         	Server.users.get(name).out.println("invalid command");
@@ -354,7 +376,7 @@ public class Server {
         }
         
         
-
+        // thread to run parallel to main thread
     	@Override
     	public void run() {
     		System.out.println("Accepted anonymous user");
@@ -362,60 +384,61 @@ public class Server {
     		while (true)
     		{
     		
-    		try 
-    		{
-    			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-    			out = new PrintWriter(socket.getOutputStream());
+                try
+                {
+                    in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                    out = new PrintWriter(socket.getOutputStream());
     			
-    			while (true)
-    			{
+                    while (true)
+                    {
     							
-    			boolean go = false;
-    			String username = null;
+                        boolean go = false;
+                        String username = null;
     			
-    			while (!go) 
-    			{
-    				username = in.readLine();
-    				go = username(username);
-    			}
+                        // validate username
+                        while (!go)
+                        {
+                            username = in.readLine();
+                            go = username(username);
+                        }
+                        
+                        go = false;
     			
-    			go = false;
+                        // validate password
+                        while (!go)
+                        {
+                            String pass = in.readLine();
+                            go = password(username, pass);
+                        }
     			
-    			while (!go) 
-    			{
-    				String pass = in.readLine();
-    				go = password(username, pass);
-    			}
+                        go = false;
     			
-    			go = false;
-    			
-    			while (!go) 
-    			{
-    				
-  	        	   
-  	        	    String com = "command";
+                        // intepret commands
+                        while (!go)
+                        {
+                            String com = "command";
   	        	    
-  	        	   	socket.setSoTimeout(TIME_OUT*60*1000);
-  	        	   	try
-  	        	   	{
-  	        	   		com = in.readLine();
-  	        	   	} catch (SocketTimeoutException e)
-  	        	   	{
-  	        	   		Server.users.get(name).logged_in = false;
-  	        	   		out.println("logout");
-  	        	   		out.flush();
-  	        	   		break;
-  	        	   	}
+                            socket.setSoTimeout(TIME_OUT*60*1000);
+                            try
+                            {
+                                com = in.readLine();
+                            } catch (SocketTimeoutException e)
+                            {
+                                Server.users.get(name).logged_in = false;
+                                out.println("logout");
+                                out.flush();
+                                break;
+                            }
 
-    				if (com == null)
-    	        		com = "nullcommand";
+                            if (com == null)
+                                com = "nullcommand";
     				
-    				command(com);
-    				if (com.equals("logout") || !Server.users.get(name).logged_in) 
-    				{
-    					out.println("logout");
-    					out.flush();
-    					break;	
+                            command(com);
+                            if (com.equals("logout") || !Server.users.get(name).logged_in)
+                            {
+                                out.println("logout");
+                                out.flush();
+                                break;
     				}
     					
     			}
@@ -441,10 +464,12 @@ public class Server {
 			port = 9999;
     	else	
     		port = Integer.parseInt(args[0]);
-    		
+    	
+        // establish listen socket
     	Server server = new Server(port);	
     	ServerSocket serverSocket = new ServerSocket(port);
     	
+        // accept new clients in perpetuity
     	while (true) 
     	{
     		Socket clientSocket = serverSocket.accept();

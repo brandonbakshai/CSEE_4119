@@ -112,8 +112,9 @@ public class Client extends JFrame implements Runnable
 			
 			
 			String text = in.readLine();
-			out.println(text);
-			out.flush();
+			if (!(text == null))
+				out.println(text);
+				out.flush();
       	   
 			if (text.equals("logout"))
 				System.exit(0);

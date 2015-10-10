@@ -163,7 +163,7 @@ public class Server {
         static long timer;
         static long timeout;
         static boolean blocked;
-        static int TIME_OUT = 30;
+        static int TIME_OUT = 1;
         static boolean go;
         HashMap<String, Integer> blocked_ips;
         static int ATTEMPTS = 3;
@@ -270,6 +270,8 @@ public class Server {
 
         public boolean command(String com) 
         {
+        	if (com == null)
+        		com = "nullcommand";
         	Scanner scan = new Scanner(com);
         	String order = scan.next().toLowerCase();
             String tmp;
@@ -389,21 +391,12 @@ public class Server {
     			while (!go) 
     			{
     				
-    				Date timeToRun = new Date(System.currentTimeMillis() + 30*60*1000);
-  	        	   Timer timer = new Timer();
-  	        	   timer.schedule(new TimerTask() {
-  	        	           public void run() {
-  	        	               Server.users.get(name).logged_in = false;
-  	        	               Server.users.get(name).out.println("logout");
-  	        	               Server.users.get(name).out.flush();
-  	        	               setgo(true);
-  	        	           }
-  	        	       }, timeToRun);
   	        	   
   	        	    String com = "command";
   	        	    
-  	        	   	socket.setSoTimeout(1000);
-  	        	   	try{
+  	        	   	socket.setSoTimeout(TIME_OUT*60*1000);
+  	        	   	try
+  	        	   	{
   	        	   		com = in.readLine();
   	        	   	} catch (SocketTimeoutException e)
   	        	   	{
@@ -413,6 +406,9 @@ public class Server {
   	        	   		break;
   	        	   	}
 
+    				if (com == null)
+    	        		com = "nullcommand";
+    				
     				command(com);
     				if (com.equals("logout") || !Server.users.get(name).logged_in) 
     				{
@@ -422,7 +418,7 @@ public class Server {
     				}
     					
     			}
-    			}
+    		}
     					
     		} catch (IOException e1) 
     		{
@@ -431,7 +427,6 @@ public class Server {
 				out.flush();
 				break;
     		}
-    		
     	}
     }
 }
@@ -439,7 +434,6 @@ public class Server {
     // main method
     public static void main(String[] args) throws IOException 
     {
-    	
     	int port;
     	
     	if (args[0] == null)
@@ -447,31 +441,17 @@ public class Server {
     	else	
     		port = Integer.parseInt(args[0]);
     		
-    	Server server = new Server(port);
-    	
-    	
+    	Server server = new Server(port);	
     	ServerSocket serverSocket = new ServerSocket(port);
     	
-    	
-    	
-    	
-    	
-    		
-    		while (true) 
-    		{
- 
-    			Socket clientSocket = serverSocket.accept();
-    			clientSocket.setSoTimeout(TIME_OUT*60*1000);
-    			User anonUser = new User(clientSocket.getInetAddress().toString(), clientSocket);
-    			Thread thread = new Thread(anonUser);
-    			thread.start();
-    			
-    	
-    		
-    		}
-    	
-    	
-    }
-    
+    	while (true) 
+    	{
+    		Socket clientSocket = serverSocket.accept();
+    		User anonUser = new User(clientSocket.getInetAddress().toString(), clientSocket);
+    		Thread thread = new Thread(anonUser);
+    		thread.start();   			   			
+    	}   		
+   	}  
     
 }
+

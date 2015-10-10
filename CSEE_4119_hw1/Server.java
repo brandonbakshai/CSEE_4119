@@ -289,7 +289,7 @@ public class Server {
             } else if (order.equals("message"))
             {
                 message(com);
-            } else if (equals.("logout"))
+            } else if (order.equals("logout"))
             {
                 logout();
             } else 
